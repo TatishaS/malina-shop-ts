@@ -2,23 +2,23 @@ import React, { FC } from "react";
 import cn from "classnames";
 import logo from "../assets/images/malina-logo.svg";
 import cartIcon from "../assets/images/cart.svg";
-import { CartItemInterface } from "../types";
 
-const cartItems: CartItemInterface[] = [
-  {
-    _id: "1klo752n",
-    name: "SHISEIDO POWDER GEL EYESHADOW",
-    imgPath:
-      "https://api.rivegauche.ru/medias6/730852177116.jpg?context=bWFzdGVyfGltYWdlc3w2MjMyMzN8aW1hZ2UvanBlZ3xoMTIvaGI0LzEwODAzMzE3Mjc2NzAyLzczMDg1MjE3NzExNi5qcGd8ODJjYTJlNzUyMTc0NTkyYjAzNjJlZjczMmI1MzA0YTQ1OWZhOWU3MDkwZTAxMTY2ODc3MTlmNzVkNjY0MzY2Mw",
-    price: 40,
-    quantity: 1,
-  },
-];
+import { useTypedSelector } from "../hooks/useTypedSelector";
+import { useDispatch } from "react-redux";
+import { removeFromCart } from "../store/cart/actions";
 
 const Header: FC = () => {
   const [isShowCart, setIsShowCart] = React.useState(false);
 
-  const total = cartItems.reduce((acc, item) => acc + item.price, 0);
+  const cart = useTypedSelector((state) => state.cart);
+  console.log(cart);
+  const total = cart.reduce((acc, item) => acc + item.price, 0);
+
+  const dispatch = useDispatch();
+
+  const handleClickRemove = (id: string) => {
+    dispatch(removeFromCart(id));
+  };
 
   return (
     <div
@@ -35,8 +35,8 @@ const Header: FC = () => {
       >
         <img src={cartIcon} alt="" width="50" />
 
-        <div className="text-red-600 absolute bottom-0 right-1 font-bold rounded-full bg-white w-5 h-5 flex items-center text-center">
-          {cartItems.length}
+        <div className="text-red-600 absolute bottom-0 right-1 font-bold rounded-full bg-white w-5 h-5 flex items-center justify-center">
+          {cart.length}
         </div>
       </button>
       <div
@@ -47,11 +47,14 @@ const Header: FC = () => {
           }
         )}
         style={{
-          top: 60,
+          top: 100,
         }}
       >
-        {cartItems.map((item) => (
-          <div className="flex items-center" key={`cart item ${item.name}`}>
+        {cart.map((item) => (
+          <div
+            className="flex items-center mb-2"
+            key={`cart item ${item.name}`}
+          >
             <img
               className="mr-3"
               src={item.imgPath}
@@ -61,10 +64,11 @@ const Header: FC = () => {
             />
             <div>
               <span>{item.name}</span>
-              <span>{`${
-                item.quantity
-              } x $${item.price.toLocaleString()}`}</span>
-              <button className="text-red-600 bg-transparent border-0">
+              <span>{`${item.count} x $${item.price.toLocaleString()}`}</span>
+              <button
+                className="text-red-600 bg-transparent border-0"
+                onClick={() => handleClickRemove(item._id)}
+              >
                 Удалить
               </button>
             </div>
